@@ -1,6 +1,6 @@
 {
   "name": "nextjs-middleware-api",
-  "version": "1.0.1",
+  "version": "1.0.0",
   "description": "simple nextjs middleware for api routes",
   "main": "index.js",
   "scripts": {
@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/a7medmo7med9/nextjs-middleware-api-.git"
+    "url": "git+https://github.com/a7medmo7med9/nextjs-middleware-api.git"
   },
   "keywords": [
     "nextjs-middleware-api",
@@ -21,7 +21,7 @@
   "author": "Ahmed Mohamed",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/a7medmo7med9/nextjs-middleware-api-/issues"
+    "url": "https://github.com/a7medmo7med9/nextjs-middleware-api/issues"
   },
-  "homepage": "https://github.com/a7medmo7med9/nextjs-middleware-api-#readme"
+  "homepage": "https://github.com/a7medmo7med9/nextjs-middleware-api#readme"
 }
