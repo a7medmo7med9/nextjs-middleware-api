@@ -20,7 +20,11 @@ Simple usage with nextjs api route.
 1 - `/pages/api/hello` route example
 
 ```javascript
+
 import middlewareHandler from 'nextjs-middleware-api'
+
+import Auth from '../../customMiddleware/auth';
+import allowRequestMethods from '../../customMiddleware/allowRequestMethods';
 
 export default async function handler(req, res) 
 {
@@ -46,6 +50,7 @@ const allowRequestMethods = (allowMethods, req, res) => new Promise((resolve, re
     }
     else
     {
+        // if you reject this process return res.send() with your custom message error
         res.status(404).send();
         return reject();
     }
@@ -57,7 +62,7 @@ export default allowRequestMethods
 add custom auth middleware `Auth`
 
 ```javascript
-const Auth = (req, res) => new Promise(async (resolve, reject) =>
+const Auth = (req, res) => new Promise((resolve, reject) =>
 {
     // Check for token 
     // return resolve if token ok
@@ -68,6 +73,7 @@ const Auth = (req, res) => new Promise(async (resolve, reject) =>
     }
     else
     {
+        // if you reject this process return res.send() with your custom message error
         res.status(401).send({ message: 'login first' });
         reject();
     }
