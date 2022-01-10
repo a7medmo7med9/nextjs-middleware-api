@@ -65,7 +65,9 @@ function routerHandler()
             if (middlewares.length <= 0) throw new Error('please provide a callback function')
             // 2- run function and wait for callback to run next function
             let index = 0;
+
             await runNextFunction(middlewares[index]);
+            
             function runNextFunction(func) {
                 return new Promise((resolve) =>  {
                     func(req, res, async function (result) {

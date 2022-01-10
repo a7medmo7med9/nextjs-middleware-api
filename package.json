@@ -16,7 +16,9 @@
     "nextjs-middleware",
     "middleware",
     "nextjs",
-    "next"
+    "next",
+    "cors",
+    "next-cors"
   ],
   "author": "Ahmed Mohamed",
   "license": "MIT",
