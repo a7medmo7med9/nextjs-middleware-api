@@ -1,24 +1,99 @@
-const middlewareHandler = async (arrayOFMiddlewares: Array<Function> = []) => 
+const cors = require('cors')
+
+function routerHandler()
 {
-    if (!Array.isArray(arrayOFMiddlewares)) {
-        throw new Error('please provide an array of middlewares functions')
-    }
-    let isNextActive = true;
-    
-    for (const middleware of arrayOFMiddlewares) 
+    return async (req, res) => 
     {
+        
         try 
         {
-            await middleware();
-        } 
-        catch (e) 
-        {
-            isNextActive = false;
-            break;
-        }
-    }
+            // check for arg
+            if (arguments.length <= 0) {
+                throw new Error('please provide a callback function')
+            }
 
-    return isNextActive;
+
+            let middlewares = [];
+            let options: any = {}
+            // get arg in var
+            for (const arg of arguments) 
+            {
+                switch (typeof arg) 
+                {
+                    case 'function':
+                        middlewares.push(arg)
+                        break;
+                    case 'object':
+                        options = arg
+                        break;
+                }
+            }
+
+            // handle cors and allowedMethods
+            // 1- check if options not empty to run cors check
+            if (options && Object.keys(options).length != 0) 
+            {
+                // Handle allowedMethods
+                const { allowedMethods } = options;
+                if (Array.isArray(allowedMethods) && allowedMethods.length > 0) 
+                {
+                    let onlyAllowedMethods = [];
+                    for (const method of allowedMethods) {
+                        if (typeof method == 'string') {
+                            onlyAllowedMethods.push(method.toLowerCase())
+                        }
+                    }
+
+                    if (!onlyAllowedMethods.includes(req.method.toLowerCase())) {
+                        return res.status(404).send();
+                    }
+                }
+
+                // Handle cors
+                cors(options)(req, res, function (result) {
+                    console.log(result);
+                    if (result instanceof Error) {
+                        return result;
+                    }
+                    return result;
+                })
+            }
+            /*******************************************************************************/
+
+
+            // handle middlewares
+            // 1- check for callback
+            if (middlewares.length <= 0) throw new Error('please provide a callback function')
+            // 2- run function and wait for callback to run next function
+            let index = 0;
+            function runNextFunction(func) {
+                return new Promise<void>((resolve) =>  {
+                    func(req, res, async function (result) {
+                        if (result instanceof Error) {
+                            resolve();
+                        }
+                        else 
+                        {
+                            index++;
+                            if (middlewares[index]) {
+                                resolve();
+                                await runNextFunction(middlewares[index])
+                            }
+                            else resolve()
+                        }
+                    }, function() {
+                        resolve()
+                    })
+                })
+            }
+            await runNextFunction(middlewares[index]);
+        } 
+        catch (error) 
+        {
+            console.log(error);
+        }
+    };
+        
 }
 
-export = middlewareHandler;
+export = routerHandler;

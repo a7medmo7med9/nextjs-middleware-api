@@ -23,5 +23,8 @@
   "bugs": {
     "url": "https://github.com/a7medmo7med9/nextjs-middleware-api/issues"
   },
-  "homepage": "https://github.com/a7medmo7med9/nextjs-middleware-api#readme"
+  "homepage": "https://github.com/a7medmo7med9/nextjs-middleware-api#readme",
+  "dependencies": {
+    "cors": "latest"
+  }
 }
