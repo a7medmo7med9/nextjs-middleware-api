@@ -51,7 +51,6 @@ function routerHandler()
 
                 // Handle cors
                 cors(options)(req, res, function (result) {
-                    console.log(result);
                     if (result instanceof Error) {
                         return result;
                     }
