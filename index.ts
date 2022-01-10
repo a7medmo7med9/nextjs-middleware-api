@@ -33,6 +33,14 @@ function routerHandler()
             // 1- check if options not empty to run cors check
             if (options && Object.keys(options).length != 0) 
             {
+                // Handle cors
+                cors(options)(req, res, function (result) {
+                    if (result instanceof Error) {
+                        return result;
+                    }
+                    return result;
+                })
+
                 // Handle allowedMethods
                 const { allowedMethods } = options;
                 if (Array.isArray(allowedMethods) && allowedMethods.length > 0) 
@@ -48,14 +56,6 @@ function routerHandler()
                         return res.status(404).send();
                     }
                 }
-
-                // Handle cors
-                cors(options)(req, res, function (result) {
-                    if (result instanceof Error) {
-                        return result;
-                    }
-                    return result;
-                })
             }
             /*******************************************************************************/
 

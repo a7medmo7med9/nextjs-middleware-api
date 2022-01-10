@@ -1,6 +1,6 @@
 {
   "name": "nextjs-middleware-api",
-  "version": "1.0.0",
+  "version": "1.0.3",
   "description": "simple nextjs middleware for api routes",
   "main": "index.js",
   "scripts": {
