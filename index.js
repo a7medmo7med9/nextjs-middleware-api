@@ -61,36 +61,38 @@ function routerHandler()
 
 
             // handle middlewares
-            // 1- check for callback
-            if (middlewares.length <= 0) throw new Error('please provide a callback function')
-            // 2- run function and wait for callback to run next function
-            let index = 0;
 
-            await runNextFunction(middlewares[index]);
-            
-            function runNextFunction(func) {
-                return new Promise((resolve) =>  {
-                    func(req, res, async function (result) {
-                        if (result instanceof Error) {
-                            resolve();
-                        }
-                        else 
-                        {
-                            index++;
-                            if (middlewares[index]) {
+            if (req.method != "OPTIONS") {
+                // 1- check for callback
+                if (middlewares.length <= 0) throw new Error('please provide a callback function')
+                // 2- run function and wait for callback to run next function
+                let index = 0;
+
+                await runNextFunction(middlewares[index]);
+                
+                function runNextFunction(func) {
+                    return new Promise((resolve) =>  {
+                        func(req, res, async function (result) {
+                            if (result instanceof Error) {
                                 resolve();
-                                await runNextFunction(middlewares[index])
                             }
-                            else resolve()
-                        }
-                    }, function() {
-                        resolve()
+                            else 
+                            {
+                                index++;
+                                if (middlewares[index]) {
+                                    resolve();
+                                    await runNextFunction(middlewares[index])
+                                }
+                                else resolve()
+                            }
+                        }, function() {
+                            resolve()
+                        })
                     })
-                })
+                }
             }
         } 
-        catch (error) 
-        {
+        catch (error) {
             console.log(error);
         }
     };
