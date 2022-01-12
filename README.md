@@ -5,7 +5,9 @@ simple nextjs middleware for api routes
 
 ## Description
 
-`nextjs-middleware-api` gives you a simple way to add custom middleware functions
+`nextjs-middleware-api` gives you a simple way to add custom middleware functions or using npm middleware 
+
+like `cors` and `express-rate-limit` and `cookie-parser` ...more
 
 ## Install
 
@@ -13,34 +15,42 @@ simple nextjs middleware for api routes
 $ npm install nextjs-middleware-api
 ```
 
-## Usage with simple middleware
+## Usage with custom middleware
 
 Simple usage with nextjs api route.
 
-`/pages/api/hello` route example
+`/pages/api/account` route example
 
 ```javascript
+// import package
 import NextMiddleware from 'nextjs-middleware-api'
-import Auth from './middleware/auth'
 
+// import your cutom middleware
+import Auth from './customMiddleware/auth'
+
+// add your custom middleware and callback function
 export default NextMiddleware(Auth, (req, res) => {
-    res.send("Hello mr " + req.user.username)
+    res.send("Hello mr " + req.username)
 })
 ```
 
-`/middleware/auth.js` file
+`/middleware/auth.js` custom middleware file
 
 ```javascript
+// you can catch [req, res, next, stop] to handle your custom middleware function
 function Auth(req, res, next, stop) {
     // 1- get token from [req]
     // 2- check token validation
     // 3- return response
 
+    // dummy example
     // if token is valid return next() function
     if (1 == 1) 
     {
-        // return next() to continue to the next middleware or final callback function
+        // do your work
         req.username = "John Doe";
+        
+        // after you finish return next() to continue to the next middleware fi exist or your final callback function
         next();
     }
     else
@@ -55,39 +65,67 @@ function Auth(req, res, next, stop) {
 export default Auth;
 ```
 
-## Usage with cors
+## Usage with npm middleware packages like `cors`
 
-you can add cors to middleware by just pass object with cors options
+you can add cors to middleware by just pass `cors` like this
 
 ```javascript
+// import package
 import NextMiddleware from 'nextjs-middleware-api'
 
-var corsOptions = {
-    origin: 'http://example.com',
-    optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
-    // ...
-}
+// import your cutom middleware
+import Auth from './customMiddleware/auth'
+import Validation from './customMiddleware/validation'
 
-export default NextMiddleware(corsOptions, Auth, Validation, isAdmin, (req, res) => {
+// import third party packages like cors
+import cors from 'cors'
+
+// using the middleware like
+const usingCors = cors({
+    origin: 'http://example.com', // add your domain or use "*" to accept all origins
+    methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+    optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
+    // ... more cors options
+})
+
+export default NextMiddleware(usingCors, Auth, Validation, (req, res) => {
     res.send("Hello mr " + req.username)
 })
 ```
+you can add more packages with the same way
+
 
 ## How to allow only selected methods
 
-use can allow methods like `POST` or `GET` or `Delete` or any other type of method by just pass `allowedMethods` inside `corsOptions` like
+use can allow methods like `POST` or `GET` or `Delete` or any other type of method by just pass `allowedMethods` inside `object` like this
 
 ```javascript
+// import package
 import NextMiddleware from 'nextjs-middleware-api'
 
-var corsOptions = {
+// import your cutom middleware
+import Auth from './customMiddleware/auth'
+import Validation from './customMiddleware/validation'
+import IsAdmin from './customMiddleware/isAdmin'
+
+var customOptions = {
     allowedMethods: ["POST", "get", "DelEtE"], // not case sensitive
-    origin: 'http://example.com',
-    optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
 }
 
-export default NextMiddleware(corsOptions, Auth, (req, res) => {
-    res.send("Hello mr " + req.username)
+export default NextMiddleware(customOptions, Auth, Validation, IsAdmin,  (req, res) => {
+    if (req.method == "POST") 
+    {
+        res.send("Request POST method")
+    }
+    else if (req.method == "GET") 
+    {
+        res.send("Request GET method")
+    }
+    // final else will be [DELETE] method because there is no fourth option in [allowedMethods] array
+    else 
+    {
+        res.send("Request DELETE method")
+    }
 })
 ```
 
@@ -96,13 +134,3 @@ export default NextMiddleware(corsOptions, Auth, (req, res) => {
 `allowedMethods` not case sensitive you can type `["POST"]` or `["post"]` or `["PoSt"]`
 
 `allowedMethods` will return `404 page not found` for methods not included in array
-
-`allowedMethods` not like `methods` option in cors you can still pass `methods` in cors options normally
-```javascript
-var corsOptions = {
-    allowedMethods: ["POST", "get", "DelEtE"], // custom option
-    origin: 'http://example.com', // cors option
-    methods: ["GET", "HEAD", "PUT", "PATCH", "POST", "DELETE"], // cors option
-    optionsSuccessStatus: 200 // cors option
-}
-```

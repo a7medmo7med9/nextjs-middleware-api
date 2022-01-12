@@ -1,75 +1,45 @@
-import useCors from 'cors'
-
-function routerHandler()
-{
-    return async (req, res) => 
-    {
-        try 
-        {
-            // check for arg
-            if (arguments.length <= 0) {
-                throw new Error('please provide a callback function')
-            }
-
-            let middlewares = [];
-            let options: any = {}
+function handleMiddleware() {
+    return async (req, res) => {
+        // set ip for express-rate-limit middleware
+        req.ip = req.headers["x-real-ip"] || req.connection.remoteAddress;
+        try {
+            let middlewares = [], options:any = {};
             // get arg in var
             for (const arg of arguments) {
-                switch (typeof arg) {
-                    case 'function':
-                        middlewares.push(arg)
-                        break;
-                    case 'object':
-                        options = arg
-                        break;
-                }
+                if (typeof arg == 'function') middlewares.push(arg);
+                else if (typeof arg == 'object') options = arg;
             }
-            
-            const { allowedMethods = [], cors = {} } = options;
+            const { allowedMethods = [] } = options;
 
-            // 1- check if there is cors options to use cors
-            if (cors && Object.keys(cors).length != 0) {
-                useCors(cors)(req, res, function (result) {
-                    if (result instanceof Error) {
-                        return result;
-                    }
-                    return result;
-                })
-            }
-
-            // 2- Handle allowedMethods
-            if (Array.isArray(allowedMethods) && allowedMethods.length > 0) {
+            // // 1- Handle allowedMethods option
+            if (Array.isArray(allowedMethods) && allowedMethods.length > 0)
+                // add handleAllowMethods function before last callback to run after cors if exist
+                middlewares.splice(middlewares.length - 1, 0, handleAllowMethods)
+            function handleAllowMethods(req, res, next, stop) {
                 let onlyAllowedMethods = [];
-                for (const method of allowedMethods) {
-                    if (typeof method == 'string') {
+                for (const method of allowedMethods)
+                    if (typeof method == 'string') 
                         onlyAllowedMethods.push(method.toLowerCase())
-                    }
-                }
-
+                
                 if (!onlyAllowedMethods.includes(req.method.toLowerCase())) {
-                    return res.status(404).send();
+                    res.status(404).send();
+                    stop();
                 }
+                else next();
             }
 
             // handle middlewares
-            const { origin } = cors;
-            if (origin == null || req.method != "OPTIONS") {
-                
-                // 1- check for callback
+            let index = 0;
+            if (middlewares[index] || req.method != "OPTIONS") {
+                // 1- check for callback function
                 if (middlewares.length <= 0) throw new Error('please provide a callback function')
                 // 2- run function and wait for callback to run next function
-                let index = 0;
-
                 await runNextFunction(middlewares[index]);
-                
                 function runNextFunction(func) {
-                    return new Promise<void>((resolve) =>  {
+                    return new Promise<void>((resolve) => {
                         func(req, res, async function (result) {
-                            if (result instanceof Error) {
-                                resolve();
-                            }
-                            else 
-                            {
+                            if (result instanceof Error) resolve();
+                            else {
                                 index++;
                                 if (middlewares[index]) {
                                     resolve();
@@ -77,18 +47,12 @@ function routerHandler()
                                 }
                                 else resolve()
                             }
-                        }, function() {
-                            resolve()
-                        })
+                        }, () => resolve())
                     })
                 }
             }
         } 
-        catch (error) {
-            console.log(error);
-        }
-    };
-        
+        catch (error) { console.log(error) }
+    };    
 }
-
-export = routerHandler;
+export = handleMiddleware;

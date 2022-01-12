@@ -1,6 +1,6 @@
 {
   "name": "nextjs-middleware-api",
-  "version": "1.0.5",
+  "version": "1.0.10",
   "description": "simple nextjs middleware for api routes",
   "main": "index.js",
   "scripts": {
@@ -20,13 +20,13 @@
     "cors",
     "next-cors"
   ],
-  "author": "Ahmed Mohamed",
+  "author": {
+		"name": "Ahmed Mohamed",
+		"facebook": "https://www.facebook.com/a7medmo7med9/"
+	},
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/a7medmo7med9/nextjs-middleware-api/issues"
   },
-  "homepage": "https://github.com/a7medmo7med9/nextjs-middleware-api#readme",
-  "dependencies": {
-    "cors": "latest"
-  }
+  "homepage": "https://github.com/a7medmo7med9/nextjs-middleware-api#readme"
 }
