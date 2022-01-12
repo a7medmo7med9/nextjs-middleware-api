@@ -1,7 +1,7 @@
 function handleMiddleware() {
     return async (req, res) => {
         // set ip for express-rate-limit middleware
-        req.ip = req.headers["x-real-ip"] || req.connection.remoteAddress;
+        if (!req.ip) req.ip = req.headers["x-real-ip"] || req.connection.remoteAddress;
         try {
             let middlewares = [], options:any = {};
             // get arg in var
