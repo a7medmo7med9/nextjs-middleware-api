@@ -7,7 +7,7 @@ simple nextjs middleware for api routes
 
 `nextjs-middleware-api` gives you a simple way to add custom middleware functions or using npm middleware 
 
-like `cors` and `express-rate-limit` and `cookie-parser` ...more
+like `cors` and `express-rate-limit` and `cookie-parser` and ...more
 
 ## Install
 
@@ -37,8 +37,8 @@ export default NextMiddleware(Auth, (req, res) => {
 `/middleware/auth.js` custom middleware file
 
 ```javascript
-// you can catch [req, res, next, stop] to handle your custom middleware function
-function Auth(req, res, next, stop) {
+// you can catch [req, res, next] to handle your custom middleware function
+function Auth(req, res, next) {
     // 1- get token from [req]
     // 2- check token validation
     // 3- return response
@@ -50,15 +50,13 @@ function Auth(req, res, next, stop) {
         // do your work
         req.username = "John Doe";
         
-        // after you finish return next() to continue to the next middleware fi exist or your final callback function
+        // after you finish just return next() to continue to the next middleware if exist or your final callback function
         next();
     }
     else
     {
         // if token not valid for some reason return your custom error message with custom status code
         res.status(404).send({ success: false, message: 'username or password is wrong' });
-        // then call stop() to stop next middleware from runing
-        stop();
     }
 }
 

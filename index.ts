@@ -29,26 +29,24 @@ function handleMiddleware() {
             }
 
             // handle middlewares
-            let index = 0;
-            if (middlewares[index] || req.method != "OPTIONS") {
-                // 1- check for callback function
-                if (middlewares.length <= 0) throw new Error('please provide a callback function')
-                // 2- run function and wait for callback to run next function
-                await runNextFunction(middlewares[index]);
-                function runNextFunction(func) {
-                    return new Promise<void>((resolve) => {
-                        func(req, res, async function (result) {
-                            if (result instanceof Error) resolve();
-                            else {
-                                index++;
-                                if (middlewares[index]) {
-                                    resolve();
-                                    await runNextFunction(middlewares[index])
-                                }
-                                else resolve()
-                            }
-                        }, () => resolve())
+            if (middlewares[0] || req.method != "OPTIONS") 
+            {
+                function runNextFunction(func) 
+                {
+                    return new Promise<void>(async (resolve, reject) => {
+                        let isCallbackRun = false;
+                        await func(req, res, async function (result) {
+                            isCallbackRun = true;
+                            if (result instanceof Error) return reject(result);
+                            else return resolve();
+                        })
+                        if (!isCallbackRun) reject();
                     })
+                }
+
+                for (const func of middlewares) {
+                    try { await runNextFunction(func); } 
+                    catch (e) { break; }
                 }
             }
         } 
